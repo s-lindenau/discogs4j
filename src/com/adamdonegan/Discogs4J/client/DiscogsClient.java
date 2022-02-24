@@ -51,6 +51,8 @@ public class DiscogsClient {
 	private static final String OAUTH_CALLBACK = "oauth_callback";
 	private static final String OAUTH_VERIFIER = "oauth_verifier";
 	private static final String HEADER_AUTHORIZATION = "Authorization";
+
+	private boolean debugEnabled = false;
 	
 	private String consumerKey = "";
 	private String consumerSecret = "";
@@ -87,24 +89,24 @@ public class DiscogsClient {
 	public String genericGet(String URL) {
 		
 		HttpRequest request = HttpRequest.get(URL).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
+		debugLog(request.toString());
+
 		return request.body();
 	}
-	
+
 	public String genericPost(String URL, Map<String, String> params) {
 		HttpRequest request = HttpRequest.post(URL, true).authorization(authenticatedHeader()).userAgent(userAgent).contentType(HttpRequest.CONTENT_TYPE_JSON).send(mapToJson(params));
-		System.out.println(request.toString());
-		
+		debugLog(request.toString());
+
 		return request.body();
 	}
 	
 	public String genericDelete(String URL) {
 		HttpRequest request = HttpRequest.delete(URL, true).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
+		debugLog(request.toString());
+
 		if(request.noContent()){
-			System.out.println(Integer.toString(request.code()));
+			debugLog(Integer.toString(request.code()));
 			return Integer.toString(request.code()) + " No Content";
 		}
 		
@@ -119,9 +121,9 @@ public class DiscogsClient {
 	public String identity() {
 		
 		HttpRequest request = HttpRequest.get(URL_USER_IDENTITY).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -136,10 +138,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("username", username);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_USER_PROFILE, params)).header(HEADER_AUTHORIZATION, authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -148,8 +149,8 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("username", username);
 		HttpRequest request = HttpRequest.post(replaceURLParams(URL_USER_PROFILE, params), true).authorization(authenticatedHeader()).userAgent(userAgent).contentType(HttpRequest.CONTENT_TYPE_JSON).send(mapToJson(extraParams));
-		System.out.println(request.toString());
-		
+		debugLog(request.toString());
+
 		return request.body();
 	}
 	
@@ -163,10 +164,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("query", query);		
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_SEARCH, params), true).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -175,7 +175,7 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("query", query);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_SEARCH, params), extraParams, true).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
+		debugLog(request.toString());
 
 		return request.body();
 	}
@@ -190,10 +190,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("release_id", release_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_RELEASE, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -207,10 +206,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("master_id", master_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_MASTER_RELEASE, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -224,10 +222,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("master_id", master_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_MASTER_RELEASE_VERSIONS, params), extraParams, true).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -246,10 +243,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("artist_id", artist_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_ARTIST, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -263,10 +259,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("artist_id", artist_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_ARTIST_RELEASES, params), extraParams, true).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -285,10 +280,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("label_id", label_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_LABEL, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -302,10 +296,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("label_id", label_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_LABEL_RELEASES, params), extraParams, true).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -324,10 +317,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("username", username);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_COLLECTION, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -339,8 +331,8 @@ public class DiscogsClient {
 		Map<String, String> extraParams = new HashMap<String, String>();
 		extraParams.put("name", folderName);
 		HttpRequest request = HttpRequest.post(replaceURLParams(URL_COLLECTION, params)).authorization(authenticatedHeader()).userAgent(userAgent).contentType(HttpRequest.CONTENT_TYPE_JSON).send(mapToJson(extraParams));
-		System.out.println(request.toString());
-		
+		debugLog(request.toString());
+
 		return request.body();
 	}
 	
@@ -355,10 +347,9 @@ public class DiscogsClient {
 		params.put("username", username);
 		params.put("folder_id", folder_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_COLLECTION_FOLDER, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -383,10 +374,10 @@ public class DiscogsClient {
 		params.put("username", username);
 		params.put("folder_id", folder_id);
 		HttpRequest request = HttpRequest.delete(replaceURLParams(URL_COLLECTION_FOLDER, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
+		debugLog(request.toString());
+
 		if(request.noContent()){
-			System.out.println(Integer.toString(request.code()));
+			debugLog(Integer.toString(request.code()));
 			return Integer.toString(request.code()) + " No Content";
 		}
 		
@@ -406,10 +397,9 @@ public class DiscogsClient {
 		params.put("username", username);
 		params.put("folder_id", folder_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_COLLECTION_RELEASES, params), extraParams, true).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -431,8 +421,8 @@ public class DiscogsClient {
 		params.put("folder_id", folder_id);
 		params.put("release_id", release_id);
 		HttpRequest request = HttpRequest.post(replaceURLParams(URL_ADD_RELEASE_TO_FOLDER, params)).authorization(authenticatedHeader()).userAgent(userAgent).send("");
-		System.out.println(request.toString());
-		System.out.println(request.code());
+		debugLog(request.toString());
+		debugLog(request.code());
 		
 		
 		
@@ -452,10 +442,10 @@ public class DiscogsClient {
 		params.put("release_id", release_id);
 		params.put("instance_id", instance_id);
 		HttpRequest request = HttpRequest.post(replaceURLParams(URL_MODIFY_INSTANCE_IN_FOLDER, params)).authorization(authenticatedHeader()).userAgent(userAgent).contentType(HttpRequest.CONTENT_TYPE_JSON).send(mapToJson(extraParams));
-		System.out.println(request.toString());
-		
+		debugLog(request.toString());
+
 		if(request.noContent()){
-			System.out.println(Integer.toString(request.code()));
+			debugLog(Integer.toString(request.code()));
 			return Integer.toString(request.code()) + " No Content";
 		}
 		
@@ -479,7 +469,7 @@ public class DiscogsClient {
 		HttpRequest request = HttpRequest.delete(replaceURLParams(URL_MODIFY_INSTANCE_IN_FOLDER, params)).authorization(authenticatedHeader()).userAgent(userAgent);
 		
 		if(request.noContent()){
-			System.out.println(Integer.toString(request.code()));
+			debugLog(Integer.toString(request.code()));
 			return Integer.toString(request.code()) + " No Content";
 		}
 		
@@ -498,10 +488,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("username", username);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_WANTLIST, params), extraParams, true).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -521,8 +510,8 @@ public class DiscogsClient {
 		params.put("username", username);
 		params.put("release_id", release_id);
 		HttpRequest request = HttpRequest.put(replaceURLParams(URL_MODIFY_WANTLIST_WITH_RELEASE, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		System.out.println(request.code());
+		debugLog(request.toString());
+		debugLog(request.code());
 		
 		
 		
@@ -540,9 +529,9 @@ public class DiscogsClient {
 		params.put("username", username);
 		params.put("release_id", release_id);
 		HttpRequest request = HttpRequest.delete(replaceURLParams(URL_MODIFY_WANTLIST_WITH_RELEASE, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
+		debugLog(request.toString());
 		if(request.noContent()){
-			System.out.println(Integer.toString(request.code()));
+			debugLog(Integer.toString(request.code()));
 			return Integer.toString(request.code()) + " No Content";
 		}
 		
@@ -557,10 +546,10 @@ public class DiscogsClient {
 		params.put("username", username);
 		params.put("release_id", release_id);
 		HttpRequest request = HttpRequest.post(replaceURLParams(URL_MODIFY_WANTLIST_WITH_RELEASE, params)).authorization(authenticatedHeader()).userAgent(userAgent).contentType(HttpRequest.CONTENT_TYPE_JSON).send(mapToJson(extraParams));
-		System.out.println(request.toString());
-		
+		debugLog(request.toString());
+
 		if(request.noContent()){
-			System.out.println(Integer.toString(request.code()));
+			debugLog(Integer.toString(request.code()));
 			return Integer.toString(request.code()) + " No Content";
 		}
 		
@@ -577,10 +566,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("username", username);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_INVENTORY, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -594,10 +582,9 @@ public class DiscogsClient {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("listing_id", listing_id);
 		HttpRequest request = HttpRequest.get(replaceURLParams(URL_LISTING, params)).authorization(authenticatedHeader()).userAgent(userAgent);
-		System.out.println(request.toString());
-		
-		
-		
+		debugLog(request.toString());
+
+
 		return request.body();
 	}
 	
@@ -633,7 +620,7 @@ public class DiscogsClient {
 	
 	public Map<String, String> parseParams (String responseString) {
 		Map<String, String> responseMap = new HashMap<String, String>();
-		System.out.println(responseString);
+		debugLog(responseString);
 		String[] keysAndValues = responseString.split("&");
 		
 		for(int i=0; i<keysAndValues.length; i++){
@@ -659,15 +646,15 @@ public class DiscogsClient {
 	public void getRequestToken() {
 
 		HttpRequest request = HttpRequest.get(HttpRequest.append(URL_REQUEST_TOKEN)).userAgent(userAgent).authorization(requestAuthorizationHeader());
-		
-		System.out.println(request.toString());
-		System.out.println(request.code());
+
+		debugLog(request.toString());
+		debugLog(request.code());
 		Map<String, String> r = parseParams(request.body());
 		String token = r.get("oauth_token");
 		String token_secret = r.get("oauth_token_secret");
-		System.out.println(token);
-		System.out.println(token_secret);
-		
+		debugLog(token);
+		debugLog(token_secret);
+
 		requestToken = token;
 		requestTokenSecret = token_secret;
 	}
@@ -680,18 +667,30 @@ public class DiscogsClient {
 	public void getAccessToken(String verifier) {
 		accessVerifier = verifier;
 		HttpRequest request = HttpRequest.post(URL_ACCESS_TOKEN).userAgent(userAgent).authorization(accessAuthorizationHeader()).send("");
-		System.out.println(request.toString());
-		System.out.println(request.code());
+		debugLog(request.toString());
+		debugLog(request.code());
 		Map<String, String> r = parseParams(request.body());
 		String token = r.get("oauth_token");
 		String token_secret = r.get("oauth_token_secret");
-		System.out.println(token);
-		System.out.println(token_secret);
-		
+		debugLog(token);
+		debugLog(token_secret);
+
 		oauthToken = token;
 		oauthTokenSecret = token_secret;
 	}
-	
+
+	private void debugLog(String logText) {
+		if(isDebugEnabled()) {
+			System.out.println(logText);
+		}
+	}
+
+	private void debugLog(int logNumber) {
+		if(isDebugEnabled()) {
+			System.out.println(logNumber);
+		}
+	}
+
 	public String authenticatedHeader(){
 		java.util.Date date= new java.util.Date();
 		
@@ -803,5 +802,12 @@ public class DiscogsClient {
 	public void setOauthTokenSecret(String oauthTokenSecret) {
 		this.oauthTokenSecret = oauthTokenSecret;
 	}
-	
+
+	public boolean isDebugEnabled() {
+		return debugEnabled;
+	}
+
+	public void setDebugEnabled(boolean debugEnabled) {
+		this.debugEnabled = debugEnabled;
+	}
 }
