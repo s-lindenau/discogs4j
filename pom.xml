@@ -6,11 +6,12 @@
 
     <groupId>com.adamdonegan</groupId>
     <artifactId>discogs4j</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
+    <description>Forked from https://github.com/ajdons/discogs4j</description>
     <packaging>jar</packaging>
 
     <scm>
-        <developerConnection>git@github.com:ajdons/discogs4j.git</developerConnection>
+        <url>https://github.com/s-lindenau/discogs4j</url>
     </scm>
 
     <properties>
