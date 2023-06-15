@@ -1,6 +1,6 @@
 # discogs4j
 
-**discogs4j** is a Java client/wrapper for [Discogs.com API v2.0](https://www.discogs.com/developers/ "Discogs.com API v2.0"). It allows you to retrieve information from the Discogs database including data on artists, releases, labels, etc. It will also handle the OAuth authentication process for you, allowing you to modify a user's protected resources such as collections, wantlists, etc.
+**discogs4j** is a Java client/wrapper for [Discogs.com API v2.0](https://www.discogs.com/developers/ "Discogs.com API v2.0"). It allows you to retrieve information from the Discogs database including data on artists, releases, labels, etc. It will also handle the OAuth authentication process for you, allowing you to modify a user's protected resources such as collections, wantlists, etc. Discogs alternative authentication is also supported.
 
 
 ## Quickstart
@@ -24,6 +24,12 @@ DiscogsClient client = new DiscogsClient(USER_AGENT);
 This is all you need to start hitting endpoints. This basic client will allow you access to the API endpoints that do not require Authorization.
 
 ## Authorization (optional)
+Reference to developer [documentation on Authentication](https://www.discogs.com/developers#page:authentication)  
+The following options are available:
+- None: rate limited, no images and only public access
+- OAuth: increased rate limit, images and can authenticate on behalf of any user.
+- Discogs Application: increased rate limit and images, no user.
+- Discogs Personal Token: increased rate limit and images, single user.
 
 ### OAuth Authorization
 
@@ -32,10 +38,11 @@ Before we begin the three-legged OAuth process, you will have to set a few of yo
    Alternatively, you can initialize a `DiscogsClient` and set these parameters all in one go using a longer constructor.
 
 
-   ```java
+```java
 client.setConsumerKey(CONSUMER_KEY);
 client.setConsumerSecret(CONSUMER_SECRET);
 client.setCallbackUrl(CALLBACK_URL);
+client.setAuthenticationType(AuthenticationType.OAUTH);
 
 // OR
 
@@ -54,7 +61,7 @@ DiscogsClient client = new DiscogsClient(CONSUMER_KEY, CONSUMER_SECRET, USER_AGE
 client.getRequestToken();
 ```
 
-2. Next, you will have to authorize your request token. This authorization can take place in a web brower for a typical web application, in a WebView if developing for Android, etc.
+2. Next, you will have to authorize your request token. This authorization can take place in a web browser for a typical web application, in a WebView if developing for Android, etc.
 
 In any case, you will direct a user to the authorization URL provided by the `DiscogsClient`.
 
@@ -99,9 +106,24 @@ The next time you need to initialize a `DiscogsClient`, you will simply use the 
 DiscogsClient newClient = new DiscogsClient(CONSUMER_KEY, CONSUMER_SECRET, USER_AGENT, OAUTH_TOKEN, OAUTH_TOKEN_SECRET);
 ```
 
+### Discogs Application Authorization
+Use the appropriate constructor to authorize with your (registered) application.  
+The `CONSUMER_KEY` and `CONSUMER_SECRET` should be your application-specific key and secret provided by Discogs.com.
+
+```java
+DiscogsClient client = new DiscogsClient(USER_AGENT, CONSUMER_KEY, CONSUMER_SECRET);
+```
+
+### Discogs Personal Authorization
+Use the appropriate constructor to authorize with your personal access token.
+
+```java
+DiscogsClient client = new DiscogsClient(USER_AGENT, PERSONAL_ACCESS_TOKEN);
+```
+
 ## Retrieving Data
 
-Once your DiscogsClient is initialized, you are ready to start working with the Dicogs API.
+Once your DiscogsClient is initialized, you are ready to start working with the Discogs API.
 
 ```java
 String artistID = "123456";

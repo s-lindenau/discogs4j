@@ -1,5 +1,6 @@
 package com.adamdonegan.Discogs4J.client;
 
+import com.adamdonegan.Discogs4J.models.AuthenticationType;
 import com.adamdonegan.Discogs4J.util.HttpRequest;
 
 import java.time.Duration;
@@ -8,7 +9,7 @@ import java.util.Map;
 
 public class DiscogsClient {
 	
-	//Authorization
+	//Authorization endpoints for OAuth
 	public static final String URL_REQUEST_TOKEN = "https://api.discogs.com/oauth/request_token";
 	public static final String URL_AUTHORIZE = "https://discogs.com/oauth/authorize";
 	public static final String URL_ACCESS_TOKEN = "https://api.discogs.com/oauth/access_token";
@@ -41,7 +42,8 @@ public class DiscogsClient {
 	//Marketplace
 	public static final String URL_INVENTORY ="https://api.discogs.com/users/{username}/inventory";
 	public static final String URL_LISTING = "https://api.discogs.com/marketplace/listings/{listing_id}";
-	
+
+    //OAuth
 	private static final String OAUTH_CONSUMER_KEY = "oauth_consumer_key";
 	private static final String OAUTH_NONCE = "oauth_nonce";
 	private static final String OAUTH_SIGNATURE = "oauth_signature";
@@ -51,7 +53,13 @@ public class DiscogsClient {
 	private static final String OAUTH_ACCESS_TOKEN = "oauth_token";
 	private static final String OAUTH_CALLBACK = "oauth_callback";
 	private static final String OAUTH_VERIFIER = "oauth_verifier";
-	private static final String HEADER_AUTHORIZATION = "Authorization";
+
+    //Discogs Authorization
+    private static final String DISCOGS_CONSUMER_KEY = "key";
+    private static final String DISCOGS_CONSUMER_SECRET = "secret";
+    private static final String DISCOGS_PERSONAL_TOKEN = "token";
+
+    private AuthenticationType authenticationType;
 
 	private boolean debugEnabled = false;
     private int connectTimeout = 0;
@@ -68,24 +76,72 @@ public class DiscogsClient {
 	
 	private String oauthToken = "";
 	private String oauthTokenSecret = "";
-	
+
+    private String personalAccessToken = "";
+
+    /**
+     * Create a new client with OAuth authorization
+     * @param consumer_key application consumer key
+     * @param consumer_secret application consumer secret
+     * @param user_agent application user agent
+     * @param callback_url oauth callback url
+     */
 	public DiscogsClient (String consumer_key, String consumer_secret, String user_agent, String callback_url){
 		consumerKey = consumer_key;
 		consumerSecret = consumer_secret;
 		userAgent = user_agent;
 		callbackUrl = callback_url;
+        authenticationType = AuthenticationType.OAUTH;
 	}
-	
+
+    /**
+     * Create a new client with OAuth authorization
+     * @param consumer_key application consumer key
+     * @param consumer_secret application consumer secret
+     * @param user_agent application user agent
+     * @param oauth_token oauth flow token
+     * @param oauth_token_secret oauth flow token secret
+     */
 	public DiscogsClient (String consumer_key, String consumer_secret, String user_agent, String oauth_token, String oauth_token_secret){
 		consumerKey = consumer_key;
 		consumerSecret = consumer_secret;
 		userAgent = user_agent;
 		oauthToken = oauth_token;
 		oauthTokenSecret = oauth_token_secret;
+        authenticationType = AuthenticationType.OAUTH;
 	}
-	
+
+    /**
+     * Create a new client with Discogs authorization
+     * @param user_agent application user agent
+     * @param consumer_key application consumer key
+     * @param consumer_secret application consumer secret
+     */
+    public DiscogsClient (String user_agent, String consumer_key, String consumer_secret) {
+        userAgent = user_agent;
+        consumerKey = consumer_key;
+        consumerSecret = consumer_secret;
+        authenticationType = AuthenticationType.DISCOGS_CONSUMER_AUTH;
+    }
+
+    /**
+     * Create a new client with Discogs authorization
+     * @param user_agent application user agent
+     * @param personal_access_token user personal access token
+     */
+    public DiscogsClient (String user_agent, String personal_access_token) {
+        userAgent = user_agent;
+        personalAccessToken = personal_access_token;
+        authenticationType = AuthenticationType.DISCOGS_PERSONAL_AUTH;
+    }
+
+    /**
+     * Create a new client without authorization
+     * @param user_agent application user agent
+     */
 	public DiscogsClient (String user_agent) {
 		userAgent = user_agent;
+        authenticationType = AuthenticationType.NONE;
 	}
 	
 	public String genericGet(String URL) {
@@ -135,7 +191,7 @@ public class DiscogsClient {
 	{
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("username", username);
-		HttpRequest request = createGetRequest(replaceURLParams(URL_USER_PROFILE, params)).header(HEADER_AUTHORIZATION, authenticatedHeader()).userAgent(userAgent);
+		HttpRequest request = createGetRequest(replaceURLParams(URL_USER_PROFILE, params)).authorization(authenticatedHeader()).userAgent(userAgent);
 		debugLog(request.toString());
         
 		return request.body();
@@ -627,7 +683,10 @@ public class DiscogsClient {
 		requestToken = token;
 		requestTokenSecret = token_secret;
 	}
-	
+
+    /**
+     * @return OAuth Authorization URL
+     */
 	public String getAuthorizationURL() {
 		return HttpRequest.append(URL_AUTHORIZE, "oauth_token", requestToken);
 	}
@@ -709,20 +768,50 @@ public class DiscogsClient {
 		}
 	}
 
+    /**
+     * @return the value to use in the Authorization header on Discogs resource requests
+     */
 	public String authenticatedHeader(){
-		java.util.Date date= new java.util.Date();
-		
-		String authorization = "OAuth "
-				+ OAUTH_CONSUMER_KEY + "=\"" + consumerKey + "\", "
-		        + OAUTH_NONCE + "=\"" + String.valueOf(date.getTime()) + "\", "
-		        + OAUTH_SIGNATURE + "=\"" + consumerSecret + "&" + oauthTokenSecret + "\", "
-		        + OAUTH_SIGNATURE_METHOD + "=\"" + OAUTH_SIGNATURE_METHOD_VALUE + "\", "
-		        + OAUTH_TIMESTAMP + "=\"" + String.valueOf(date.getTime()) + "\", "
-		        + OAUTH_ACCESS_TOKEN + "=\"" + oauthToken + "\"";
-		
-		return authorization;
+        switch (getAuthenticationType()) {
+            case DISCOGS_CONSUMER_AUTH:
+                return getDiscogsConsumerAuthHeader();
+            case DISCOGS_PERSONAL_AUTH:
+                return getDiscogsPersonalAuthHeader();
+            case OAUTH:
+                return getOAuthHeader();
+            case NONE:
+                // intentional fall-through to default
+            default:
+                return "";
+        }
 	}
-	
+
+    private String getDiscogsConsumerAuthHeader() {
+        return "Discogs " +
+                DISCOGS_CONSUMER_KEY + "=" + consumerKey + ", " +
+                DISCOGS_CONSUMER_SECRET + "=" + consumerSecret;
+    }
+
+    private String getDiscogsPersonalAuthHeader() {
+        return "Discogs " +
+                DISCOGS_PERSONAL_TOKEN + "=" + personalAccessToken;
+    }
+
+    private String getOAuthHeader() {
+        java.util.Date date= new java.util.Date();
+
+        return "OAuth "
+                + OAUTH_CONSUMER_KEY + "=\"" + consumerKey + "\", "
+                + OAUTH_NONCE + "=\"" + String.valueOf(date.getTime()) + "\", "
+                + OAUTH_SIGNATURE + "=\"" + consumerSecret + "&" + oauthTokenSecret + "\", "
+                + OAUTH_SIGNATURE_METHOD + "=\"" + OAUTH_SIGNATURE_METHOD_VALUE + "\", "
+                + OAUTH_TIMESTAMP + "=\"" + String.valueOf(date.getTime()) + "\", "
+                + OAUTH_ACCESS_TOKEN + "=\"" + oauthToken + "\"";
+    }
+
+    /**
+     * @return the value to use in the Authorization header on Discogs OAuth flow requests (acces_token)
+     */
 	public String accessAuthorizationHeader(){
 		java.util.Date date= new java.util.Date();
 		
@@ -737,7 +826,10 @@ public class DiscogsClient {
 		
 		return authorization;
 	}
-    
+
+    /**
+     * @return the value to use in the Authorization header on Discogs OAuth flow requests (request_token)
+     */
 	public String requestAuthorizationHeader(){
 		java.util.Date date= new java.util.Date();
 		
@@ -834,5 +926,21 @@ public class DiscogsClient {
 
     public void setReadTimeout(Duration readTimeout) {
         this.readTimeout = (int)readTimeout.toMillis();
+    }
+
+    public AuthenticationType getAuthenticationType() {
+        return authenticationType;
+    }
+
+    public void setAuthenticationType(AuthenticationType authenticationType) {
+        this.authenticationType = authenticationType;
+    }
+
+    public String getPersonalAccessToken() {
+        return personalAccessToken;
+    }
+
+    public void setPersonalAccessToken(String personalAccessToken) {
+        this.personalAccessToken = personalAccessToken;
     }
 }
